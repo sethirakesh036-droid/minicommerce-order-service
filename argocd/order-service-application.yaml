@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/REPLACE_ME/minicommerce-order-service.git
+    repoURL: https://github.com/sethirakesh036-droid/minicommerce-order-service.git
     targetRevision: main
     path: k8s
   destination:
