@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: order-service-config
 data:
-  SPRING_DATASOURCE_URL: jdbc:mysql://mysql-74b8bc449f-29fkz:3306/order_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+  SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/order_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
   SPRING_DATASOURCE_USERNAME: root
   EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
   SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
