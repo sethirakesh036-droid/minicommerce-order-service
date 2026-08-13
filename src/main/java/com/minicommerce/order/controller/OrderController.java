@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/orders")
@@ -17,6 +18,7 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final com.minicommerce.order.client.UserClient userClient;
 
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest request) {
@@ -42,5 +44,17 @@ public class OrderController {
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<String> checkUserService() {
+        try {
+            Map<String, Object> health = userClient.health();
+            Object status = health != null ? health.get("status") : "UNKNOWN";
+            return ResponseEntity.ok("user-service status: " + status);
+        } catch (Exception ex) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)
+                    .body("user-service unavailable: " + ex.getMessage());
+        }
     }
 }

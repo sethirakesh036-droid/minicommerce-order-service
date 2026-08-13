@@ -11,4 +11,8 @@ public interface UserClient {
 
     @GetMapping("/users/{id}")
     UserDto getUserById(@PathVariable("id") Long id);
+
+    // simple health endpoint call to the User Service (returns the actuator health map)
+    @GetMapping("/actuator/health")
+    java.util.Map<String, Object> health();
 }
