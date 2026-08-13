@@ -3,55 +3,89 @@ kind: Service
 metadata:
   name: mysql
   labels:
-    app: mysql
+    app.kubernetes.io/name: mysql
 spec:
-  ports:
-    - port: 3306
-      name: mysql
-  selector:
-    app: mysql
   type: ClusterIP
+  selector:
+    app.kubernetes.io/name: mysql
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: mysql
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql
   labels:
-    app: mysql
+    app.kubernetes.io/name: mysql
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql
+      app.kubernetes.io/name: mysql
   template:
     metadata:
       labels:
-        app: mysql
+        app.kubernetes.io/name: mysql
     spec:
       containers:
         - name: mysql
           image: mysql:8.0
+          ports:
+            - name: mysql
+              containerPort: 3306
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
-                  key: root-password
+                  name: user-service-secret
+                  key: MYSQL_ROOT_PASSWORD
             - name: MYSQL_DATABASE
-              value: order_db
-          ports:
-            - containerPort: 3306
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: MYSQL_PASSWORD
           volumeMounts:
             - name: mysql-data
               mountPath: /var/lib/mysql
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1 -u root -p"$MYSQL_ROOT_PASSWORD"
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
       volumes:
         - name: mysql-data
-          emptyDir: {}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mysql-secret
-type: Opaque
-stringData:
-  root-password: root
+          persistentVolumeClaim:
+            claimName: mysql-data
