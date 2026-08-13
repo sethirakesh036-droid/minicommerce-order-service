@@ -46,15 +46,5 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/check")
-    public ResponseEntity<String> checkUserService() {
-        try {
-            Map<String, Object> health = userClient.health();
-            Object status = health != null ? health.get("status") : "UNKNOWN";
-            return ResponseEntity.ok("user-service status: " + status);
-        } catch (Exception ex) {
-            return ResponseEntity.status(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)
-                    .body("user-service unavailable: " + ex.getMessage());
-        }
-    }
+
 }
